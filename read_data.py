@@ -3,6 +3,7 @@ import pandas as pd
 import pickle
 import xarray as xr
 from pyEOF import *
+from sklearn import linear_model
 
 def r_execel(f_path, drop_val = 2):
     '''
