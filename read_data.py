@@ -102,7 +102,7 @@ def r_netCDF(f_path, min_lon = -145, min_lat = 14, max_lon = -52, max_lat = 71, 
       mean_df = mean_df[['year', coor[0], coor[1], 'scpdsi']]
       df_data = get_time_space(mean_df, time_dim = "year", lumped_space_dims = [coor[0],coor[1]])
 
-    return df_data, ds_n, ret_lon, ret_lat, ds
+    return df_data, ds_n, ret_lon, ret_lat
 
 def save_pickle(f_path, vari):
     with open(f_path, 'wb') as f:
