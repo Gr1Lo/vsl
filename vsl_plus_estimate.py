@@ -885,7 +885,8 @@ def errormodel0_aux(sigma2rwcurr,RW,Gterms,intwindow,cyrs):
         Gterms = Gterms[startmo:endmo,:]
 
     # sample proposal from the prior:
-    sigma2rwprop = (np.random.uniform(0.1,1))**2
+    ################################################?????????????????????????/
+    sigma2rwprop = (np.random.uniform(0,1))**2
 
     # accept or reject?
     Nyrs = len(cyrs)
@@ -897,9 +898,8 @@ def errormodel0_aux(sigma2rwcurr,RW,Gterms,intwindow,cyrs):
     logcurr = -.5*np.sum((RW[cyrs]-np.sqrt(1-sigma2rwcurr)*(Gamma[cyrs]-Gammabar)/siggamma)**2)/sigma2rwcurr
     HR = ((sigma2rwcurr[0]/sigma2rwprop)**(Nyrs/2))*np.exp(logprop-logcurr)
 
-
     if np.isnan(HR).any():
-        HR = np.array([0.001])
+        HR = 1
 
     if np.random.binomial(1,min(HR,1))==1 : 
         sigma2rw = np.array([sigma2rwprop])
