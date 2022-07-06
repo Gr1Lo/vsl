@@ -898,8 +898,8 @@ def errormodel0_aux(sigma2rwcurr,RW,Gterms,intwindow,cyrs):
     HR = ((sigma2rwcurr[0]/sigma2rwprop)**(Nyrs/2))*np.exp(logprop-logcurr)
 
 
-    '''if np.isnan(HR).any():
-        HR = np.array([0.001])'''
+    if np.isnan(HR).any():
+        HR = np.array([0.001])
 
     if np.random.binomial(1,min(HR,1))==1 : 
         sigma2rw = np.array([sigma2rwprop])
