@@ -5,6 +5,7 @@ import numpy as np
 #np.random.seed(1222)
 from scipy.stats import zscore
 import pandas as pd
+import sys
 
 def radians(deg):
     return deg * np.pi / 180
@@ -1339,3 +1340,93 @@ def VSLite_v2_5(syear,eyear,phi,T1,T2,M1,M2,T,P, intwindow, varargin=None):
     trw = np.asmatrix(((width-np.mean(width))/np.std(width))).H #'; % proxy series is standardized width.
     trw = np.asarray(trw).T
     return(trw)
+
+def estimate_and_compute_VSL(df, 
+                             tr_t_df_nn, tr_p_df_nn, t0_var_name, p0_var_name, tr_ret_lon, tr_ret_lat, u0, coor0,
+                             t_df_nn, p_df_nn, t_var_name, p_var_name, ret_lon, ret_lat, u1, coor1,
+                             min_lon = -145, min_lat = 14, max_lon = -52, max_lat = 71):
+    lat_lon_list = []
+    all_res = []
+    cou = 0
+    for fn in (df['file_name'].unique()):
+      df_t = df[df['file_name']==fn]
+      df_t = df_t[df_t['age'].isin(tr_t_df_nn['year'].unique())]
+
+      if len(df_t)>0:
+        cou+=1
+        if ((df_t['lat'].values[0] >= min_lat) & (df_t['lat'].values[0] <= max_lat) 
+        & (df_t['lon'].values[0] >= min_lon) & (df_t['lon'].values[0] <= max_lon)):
+
+          tr_lat_ind = (np.abs(df_t['lat'].values[0] - tr_ret_lat)).argmin()
+          tr_lon_ind = (np.abs(df_t['lon'].values[0] - tr_ret_lon)).argmin()
+
+          lat_ind = (np.abs(df_t['lat'].values[0] - ret_lat)).argmin()
+          lon_ind = (np.abs(df_t['lon'].values[0] - ret_lon)).argmin()
+
+          if [lat_ind, lon_ind] not in lat_lon_list:
+
+              print('Расчет для точки ' +str(cou) + ' с индексом (CMIP_6) ' + str(lat_ind) + ' ' + str(lon_ind))
+
+              tr_t_df_nn_t = tr_t_df_nn[(tr_t_df_nn[coor0[0]]==tr_ret_lon[tr_lon_ind]) 
+              & (tr_t_df_nn[coor0[1]]==tr_ret_lat[tr_lat_ind]) 
+              & (tr_t_df_nn['year'].isin(df_t['age'].unique()))]
+
+              tr_p_df_nn_t = tr_p_df_nn[(tr_p_df_nn[coor0[0]]==tr_ret_lon[tr_lon_ind]) 
+              & (tr_p_df_nn[coor0[1]]==tr_ret_lat[tr_lat_ind]) 
+              & (tr_p_df_nn['year'].isin(df_t['age'].unique()))]
+
+              t_for_pred = t_df_nn[(t_df_nn[coor1[0]]==ret_lon[lon_ind]) 
+              & (t_df_nn[coor1[1]]==ret_lat[lat_ind])]
+              p_for_pred = p_df_nn[(p_df_nn[coor1[0]]==ret_lon[lon_ind]) 
+              & (p_df_nn[coor1[1]]==ret_lat[lat_ind])]
+
+              t_df_nn_t = pd.pivot(tr_t_df_nn_t, index='year', columns="month", values=t0_var_name)
+              p_df_nn_t = pd.pivot(tr_p_df_nn_t, index='year', columns="month", values=p0_var_name)
+              t_for_pred = pd.pivot(t_for_pred, index='year', columns="month", values=t_var_name)
+              p_for_pred = pd.pivot(p_for_pred, index='year', columns="month", values=p_var_name)
+
+              if u0[0]=='degrees Celsius':
+                T = t_df_nn_t.to_numpy().T
+              else:
+                T = t_df_nn_t.to_numpy().T-273.15
+
+              if u0[1]=='mm/month':
+                P = p_df_nn_t.to_numpy().T
+              else:
+                P = p_df_nn_t.to_numpy().T*86400*30.4167
+
+              if u1[0]=='degrees Celsius':
+                T_pred = t_for_pred.to_numpy().T
+              else:
+                T_pred = t_for_pred.to_numpy().T-273.15
+
+              if u1[1]=='mm/month':
+                P_pred = p_for_pred.to_numpy().T
+              else:
+                P_pred = p_for_pred.to_numpy().T*86400*30.4167
+
+              np.set_printoptions(threshold=sys.maxsize)
+              df_t0 = df_t[['age','trsgi']]
+              df_t0.set_index('age', inplace=True)
+              RW = df_t0.to_numpy().T[0]
+
+              Tm=np.nanmean(T, axis=1)
+
+              result = None
+              while result is None:
+                  try:
+                      T0,T1,M0,M1 = estimate_vslite_params_v2_3(T,P,df_t['lat'].values[0],RW,[3,11],varargin=None)
+                      result = 1
+                  except:
+                      pass
+              
+              res = np.round(VSLite_v2_5(850,1850,
+                                        df_t['lat'].values[0],
+                                        T0,T1,M0,M1,T_pred,P_pred,[3,11], varargin=None),3)
+              
+              all_res.append(res)
+              lat_lon_list.append([lat_ind, lon_ind])
+              print(T0,T1,M0,M1)
+
+    vsl_1000 = np.array(all_res).T
+    return vsl_1000, lat_lon_list
