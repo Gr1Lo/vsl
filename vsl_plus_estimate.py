@@ -1428,5 +1428,5 @@ def estimate_and_compute_VSL(df,
               lat_lon_list.append([lat_ind, lon_ind])
               print(T0,T1,M0,M1)
 
-    vsl_1000 = np.array(all_res).T[:,0,:]
+    vsl_1000 = np.array(all_res).T#[:,0,:]
     return vsl_1000, lat_lon_list
