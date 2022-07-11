@@ -56,7 +56,7 @@ def make_x_y(ts, data):
     return np.array(x), np.array(y)
   
   
-  def m_loss_func_weight(l_evfs, use_w):
+def m_loss_func_weight(l_evfs, use_w):
     '''
     Кастомная функция потерь
     '''
