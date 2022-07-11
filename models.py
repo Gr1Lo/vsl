@@ -184,15 +184,17 @@ def get_model_regression_RNN(n_inputs, n_outputs = 1, use_drop = False, use_batc
   return model
 
 
-def run_model(pcs_CMIP6_1, vsl_1000_pc, type_m):
+def run_model(pcs_CMIP6_1, vsl_1000_pc, evfs_CMIP6_1, type_m, use_w=False):
       '''
       Запуск обучения моделей
       pcs_CMIP6_1 - значения главных компонент scpdsi
       vsl_1000_pc - значения главных компонент trsgi
+      evfs_CMIP6_1 - массив с долей объясненных дисперсий каждой компонентой,
       type_m - вариант модели:
           'NN' - стнадартная нейронная сеть
           'RNN' - реккурентная нейронная сеть
           'lm' - линейниая модель
+      use_w - расчитывать функцию потерь с учетом evfs_CMIP6_1
 
       Возвращает:
       inverse_te_l - тестовые значения главных компонент scpdsi
@@ -225,7 +227,7 @@ def run_model(pcs_CMIP6_1, vsl_1000_pc, type_m):
                                               'test', model, 
                                               shuffle_b=True,
                                               evfs = evfs_CMIP6_1, 
-                                              use_w=True)
+                                              use_w=use_w)
         score = model.evaluate(te_t, te_l, verbose=0)
 
         inverse_te_l = scaler_vsl_1000.inverse_transform(te_l)
@@ -246,7 +248,7 @@ def run_model(pcs_CMIP6_1, vsl_1000_pc, type_m):
 
         model, hystory = simp_net_regression_1(tr_t, tr_l, 
                                               'test', model, shuffle_b = False,
-                                              use_w=False,
+                                              use_w=use_w,
                                               evfs = evfs_CMIP6_1, min_delta = 0.0001)
         
         te_t, y = make_x_y(1, te_t)
