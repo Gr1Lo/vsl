@@ -9,6 +9,7 @@ import statsmodels.api as sm
 from sklearn.preprocessing import MinMaxScaler
 from matplotlib import colors
 import numpy as np
+from matplotlib import pyplot as plt
 
 def train_and_test(trsgi, labels, p_v, keep_order = False):
 
