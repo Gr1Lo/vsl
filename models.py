@@ -305,7 +305,7 @@ def rev_diff(y_pred, y_true, eofs, eigvals, pca, ds_n, ttl, p_type='diff', scale
         Yhat0 = pca._scaler.inverse_transform(Yhat0)
         u0 = Yhat0
 
-        if p_type=='coor':
+        if p_type=='corr':
           coor_ar = []
           for i in range(u0.shape[1]):
             i0 = u[:,i]
@@ -318,17 +318,21 @@ def rev_diff(y_pred, y_true, eofs, eigvals, pca, ds_n, ttl, p_type='diff', scale
 
           loss0 = np.array(coor_ar)
           ttl_str = '; среднее значение коэффициента корреляции = '
+          vmin = -1
+          vmax = 1
 
         else:
           loss0 = np.abs(u - u0)
           loss0 = np.where(loss0>50, np.nan, loss0)
           loss0 = np.mean(loss0,axis=0)
           ttl_str = '; среднее значение разницы = '
+          vmin = 0
+          vmax = 8
 
         new = np.reshape(loss0, (-1, ds_n.shape[2]))
         plt.figure(figsize = (19,10))
         im = plt.imshow(new[::-1], interpolation='none',
-                        vmin=-1, vmax=1,cmap='jet')
+                        vmin=vmin, vmax=vmax,cmap='jet')
 
         cbar = plt.colorbar(im,
                             orientation='vertical')
