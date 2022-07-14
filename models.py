@@ -10,6 +10,7 @@ from sklearn.preprocessing import MinMaxScaler
 from matplotlib import colors
 import numpy as np
 from matplotlib import pyplot as plt
+import scipy
 
 def train_and_test(trsgi, labels, p_v, keep_order = False):
 
@@ -268,7 +269,8 @@ def run_model(pcs_CMIP6_1, vsl_1000_pc, evfs_CMIP6_1, type_m, use_w=False):
       return inverse_te_l, inverse_est
     
     
-def rev_diff(y_pred, y_true, eofs, eigvals, pca, ds_n, ttl, scale_type = 2):
+def rev_diff(y_pred, y_true, eofs, eigvals, pca, ds_n, ttl, p_type='diff', scale_type = 2):
+       
         '''
         Визульная оценка работы моделей
         y_pred - тестовые значения главных компонент scpdsi, 
@@ -278,6 +280,9 @@ def rev_diff(y_pred, y_true, eofs, eigvals, pca, ds_n, ttl, scale_type = 2):
         pca - объект, полученный в результате eof_an, 
         ds_n -трехмерный массив, используется для извлечения параметров исходных данных, 
         ttl - название модели, 
+        p_type - параметр, на основе которого будут строиться карты
+                  'diff' - модуль разницы
+                  'corr' - коэффициент корреляции Пирсона
         scale_type - параметр отвечающий за масштабирование главных компонент и 
                      EOF через умножение/деление значений на собственные числа
         '''
@@ -300,14 +305,30 @@ def rev_diff(y_pred, y_true, eofs, eigvals, pca, ds_n, ttl, scale_type = 2):
         Yhat0 = pca._scaler.inverse_transform(Yhat0)
         u0 = Yhat0
 
-        loss0 = np.abs(u - u0)
-        loss0 = np.where(loss0>50, np.nan, loss0)
-        loss0 = np.mean(loss0,axis=0)
+        if p_type=='coor':
+          coor_ar = []
+          for i in range(u0.shape[1]):
+            i0 = u[:,i]
+            i1 = u0[:,i]
+            if ~np.isnan(i0[0]):
+              corr2 = scipy.stats.pearsonr(i0,i1)[1]
+              coor_ar.append(corr2)
+            else:
+              coor_ar.append(np.nan)
+
+          loss0 = np.array(coor_ar)
+          ttl_str = '; среднее значение коэффициента корреляции = '
+
+        else:
+          loss0 = np.abs(u - u0)
+          loss0 = np.where(loss0>50, np.nan, loss0)
+          loss0 = np.mean(loss0,axis=0)
+          ttl_str = '; среднее значение разницы = '
 
         new = np.reshape(loss0, (-1, ds_n.shape[2]))
         plt.figure(figsize = (19,10))
         im = plt.imshow(new[::-1], interpolation='none',
-                        vmin=0, vmax=8,cmap='jet')
+                        vmin=-1, vmax=1,cmap='jet')
 
         cbar = plt.colorbar(im,
                             orientation='vertical')
@@ -316,7 +337,7 @@ def rev_diff(y_pred, y_true, eofs, eigvals, pca, ds_n, ttl, scale_type = 2):
 
         loss0 = np.nanmean(loss0)
 
-        plt.title(ttl + '; среднее значение разницы = ' + str(round(loss0,3)),fontsize=20)
+        plt.title(ttl + ttl_str + str(round(loss0,3)),fontsize=20)
         plt.show()
 
         return loss0
