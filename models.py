@@ -21,6 +21,8 @@ def train_and_test(trsgi, labels, p_v, keep_order = False):
   p_v - доля тестовой выборки,
   keep_order - использовать для теста первые записи (сохранять порядок) 
   '''
+  
+  np.random.seed(123)
 
   nums = np.ones(len(trsgi))
   nums[:int(len(trsgi)*p_v)] = 0
