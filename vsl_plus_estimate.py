@@ -838,7 +838,7 @@ def TM_aux(mVar_curr,mVar,mVaro,gM,RW,errorpars,gE,Gterms,intwindow,cyrs,m_type,
             iSig = makeAR1covmat(phi1,tau2,length(cyrs))
             
             Wcurr = ((np.sum(gcurr[:,cyrs])-np.mean(np.sum(gcurr)))/np.std(np.sum(gcurr))).T
-            Wcurr = ((np.sum(gprop[:,cyrs])-np.mean(np.sum(gprop)))/np.std(np.sum(gprop))).T
+            Wprop = ((np.sum(gprop[:,cyrs])-np.mean(np.sum(gprop)))/np.std(np.sum(gprop))).T
             
             tprop = np.matmul(np.sqrt(1-sigma2rw),Wprop)
             logLprop = np.matmul(np.matmul(-.5*(RW[cyrs]-tprop).T,iSig),(RW[cyrs] - tprop))
