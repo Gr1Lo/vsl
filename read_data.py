@@ -5,6 +5,7 @@ import xarray as xr
 from pyEOF import *
 from sklearn import linear_model
 import numpy as np
+import nc_time_axis
 
 def r_execel(f_path, drop_val = 2):
     '''
