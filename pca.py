@@ -34,7 +34,8 @@ def visualization(da, pcs, eofs_da, evf, n, dims):
     plt.tight_layout()
     plt.show()
 
-def eof_an(df_clim_index, ds_n, n = 10, scale_type = 0, pca_type = "varimax", evfs_lower_limit = 0, dims = ["latitude","longitude"]):
+def eof_an(df_clim_index, ds_n, n = 10, scale_type = 0, pca_type = "varimax", evfs_lower_limit = 0, dims = ["latitude","longitude"],
+          plots=False):
 
     '''
     EOF-анализ
@@ -43,6 +44,7 @@ def eof_an(df_clim_index, ds_n, n = 10, scale_type = 0, pca_type = "varimax", ev
     scale_type - параметр, отвечающий за масштабирование при расчете EOF
     evfs_lower_limit - нижний порог объясненной доли дисперсии
     dims - названия осей с координатами
+    plots - выводить изображения EOF
     '''
     evfs = [0]
 
@@ -61,7 +63,8 @@ def eof_an(df_clim_index, ds_n, n = 10, scale_type = 0, pca_type = "varimax", ev
     eigvals = pca.eigvals(n=n)
 
     # plot
-    #visualization(ds_n, pcs, eofs_da, evfs, n, dims)
+    if plots:
+        visualization(ds_n, pcs, eofs_da, evfs, n, dims)
 
     return (pca, eofs, pcs, evfs, eigvals, n)
   
