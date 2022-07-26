@@ -313,7 +313,7 @@ def rev_diff(y_pred, y_true, eofs, eigvals, pca, ds_n, ttl, p_type='diff', scale
             i0 = u[:,i]
             i1 = u0[:,i]
             if ~np.isnan(i0[0]):
-              corr2 = scipy.stats.pearsonr(i0,i1)[0]
+              corr2 = scipy.stats.spearmanr(i0,i1)[0]
               coor_ar.append(corr2)
             else:
               coor_ar.append(np.nan)
