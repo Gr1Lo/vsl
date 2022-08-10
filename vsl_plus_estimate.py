@@ -1,6 +1,8 @@
 import warnings
 warnings.filterwarnings("ignore")
 
+#original work: https://www1.ncdc.noaa.gov/pub/data/paleo/softlib/vs-lite/
+
 import numpy as np
 #np.random.seed(1222)
 from scipy.stats import zscore
