@@ -1343,7 +1343,7 @@ def VSLite_v2_5(syear,eyear,phi,T1,T2,M1,M2,T,P, intwindow, varargin=None):
     trw = np.asarray(trw).T
     return(trw)
 
-def estimate_and_compute_VSL(df, 
+def estimate_and_compute_VSL(df, st_year, end_year,
                              tr_t_df_nn, tr_p_df_nn, t0_var_name, p0_var_name, tr_ret_lon, tr_ret_lat, u0, coor0,
                              t_df_nn, p_df_nn, t_var_name, p_var_name, ret_lon, ret_lat, u1, coor1,
                              min_lon = -145, min_lat = 14, max_lon = -52, max_lat = 71):
@@ -1422,7 +1422,7 @@ def estimate_and_compute_VSL(df,
                   except:
                       pass
               
-              res = np.round(VSLite_v2_5(850,1850,
+              res = np.round(VSLite_v2_5(st_year,end_year,
                                         df_t['lat'].values[0],
                                         T0,T1,M0,M1,T_pred,P_pred,[3,11], varargin=None),3)
               
