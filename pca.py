@@ -6,20 +6,20 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 import scipy
 
-def visualization(da, pcs, eofs_da, evf, n, dims):
+def visualization(da, pcs, eofs_da, evf, n, dims, var_name = 'scpdsi'):
     fig = plt.figure(figsize = (12,2.5*n))
 
     ax = fig.add_subplot(n+1,2,1)
     da.mean(dim=dims).plot(ax=ax)
-    ax.set_title("average scpdsi")
+    ax.set_title("average " + var_name)
 
     ax = fig.add_subplot(n+1,2,2)
     da.mean(dim="time").plot(ax=ax)
-    ax.set_title("average scpdsi")
+    ax.set_title("average " + var_name)
 
     for i in range(1,n+1):
         pc_i = pcs["PC"+str(i)].to_xarray()
-        eof_i = eofs_da.sel(EOF=i)["scpdsi"]
+        eof_i = eofs_da.sel(EOF=i)[var_name]
         frac = str(np.array(evf[i-1]*100).round(2))
 
         ax = fig.add_subplot(n+1,2,i*2+1)
@@ -36,7 +36,7 @@ def visualization(da, pcs, eofs_da, evf, n, dims):
     plt.show()
 
 def eof_an(df_clim_index, ds_n, n = 10, scale_type = 0, pca_type = "varimax", evfs_lower_limit = 0, dims = ["latitude","longitude"],
-          plots=False):
+          plots=False, var_name = 'scpdsi'):
 
     '''
     EOF-анализ
@@ -65,7 +65,7 @@ def eof_an(df_clim_index, ds_n, n = 10, scale_type = 0, pca_type = "varimax", ev
 
     # plot
     if plots:
-        visualization(ds_n, pcs, eofs_da, evfs, n, dims)
+        visualization(ds_n, pcs, eofs_da, evfs, n, dims, var_name)
 
     return (pca, eofs, pcs, evfs, eigvals, n)
   
