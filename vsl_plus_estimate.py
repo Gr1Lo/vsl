@@ -1346,7 +1346,7 @@ def VSLite_v2_5(syear,eyear,phi,T1,T2,M1,M2,T,P, intwindow, varargin=None):
 def estimate_and_compute_VSL(df, st_year, end_year,
                              tr_t_df_nn, tr_p_df_nn, t0_var_name, p0_var_name, tr_ret_lon, tr_ret_lat, u0, coor0,
                              t_df_nn, p_df_nn, t_var_name, p_var_name, ret_lon, ret_lat, u1, coor1,
-                             min_lon = -145, min_lat = 14, max_lon = -52, max_lat = 71):
+                             min_lon = -145, min_lat = 14, max_lon = -52, max_lat = 71, nsamp=2000):
     lat_lon_list = []
     all_res = []
     cou = 0
@@ -1415,7 +1415,7 @@ def estimate_and_compute_VSL(df, st_year, end_year,
               Tm=np.nanmean(T, axis=1)
 
               result = None
-              nsamp = 1000
+              nsamp = nsamp#1000
               nbi = 200
               while result is None:
                   try:
