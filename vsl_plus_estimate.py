@@ -12,7 +12,7 @@ import sys
 def radians(deg):
     return deg * np.pi / 180
 
-def estimate_vslite_params_v2_3(T,P,phi,RW,intwindow,varargin=None):
+def estimate_vslite_params_v2_3(T,P,phi,RW,intwindow, nsamp, nbi, varargin=None):
     '''% Given calibration-interval temperature, precipitation, and ring-width data,
     % and site latitude, estimate_vslite_params_v2_3.m performes a Bayesian parameter
     % estimation of the growth response parameters T1, T2, M1 and M2. The
@@ -157,7 +157,7 @@ def estimate_vslite_params_v2_3(T,P,phi,RW,intwindow,varargin=None):
     %                  Leaky Bucket.
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'''
 
-    if varargin!=None > 4 : # read in advanced options if user-specified:
+    if varargin!=None: # read in advanced options if user-specified:
         #first fill values in with defaults:
         errormod = 0;
         '''gparscalint = 1:length(RW);
@@ -248,8 +248,8 @@ def estimate_vslite_params_v2_3(T,P,phi,RW,intwindow,varargin=None):
         hydroclim = 'P'
         substep = 0
         intwindow = [intwindow[0]-1, intwindow[1]-1]
-        nsamp = 1000 #1000
-        nbi = 200 #200
+        nsamp = nsamp #1000
+        nbi = nbi #200
         nchain = 5 #3
         gparpriors = 'fourbet'
         aT1 = 9 
@@ -563,7 +563,7 @@ def estimate_vslite_params_v2_3(T,P,phi,RW,intwindow,varargin=None):
     else:
         convwarning = 0
 
-    return T1,T2,M1,M2
+    return T1,T2,M1,M2,convwarning
 
 #LEAKY BUCKET WITHOUT SUBSTEPPING 
 def leakybucket_monthly(syear,eyear,phi,T,P,Mmax,Mmin,alph,m_th,mu_th,rootd,M0):
@@ -1415,9 +1415,18 @@ def estimate_and_compute_VSL(df, st_year, end_year,
               Tm=np.nanmean(T, axis=1)
 
               result = None
+              nsamp = 1000
+              nbi = 200
               while result is None:
                   try:
-                      T0,T1,M0,M1 = estimate_vslite_params_v2_3(T,P,df_t['lat'].values[0],RW,[3,11],varargin=None)
+                      T0,T1,M0,M1, convwarning = estimate_vslite_params_v2_3(T,P,df_t['lat'].values[0],RW,[3,11],
+                                                                             nsamp, nbi, varargin=None)
+                      while convwarning == 1:
+                            nsamp = nsamp * 2
+                            nbi = nbi * 2
+                            print('nsamp = ' + str(nsamp))
+                            T0,T1,M0,M1, convwarning = estimate_vslite_params_v2_3(T,P,df_t['lat'].values[0],RW,[3,11],
+                                                                             nsamp, nbi, varargin=None)       
                       result = 1
                   except:
                       pass
