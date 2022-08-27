@@ -1423,7 +1423,7 @@ def estimate_and_compute_VSL(df, st_year, end_year,
                                                                              nsamp, nbi, varargin=None)
                       while convwarning == 1:
                             nsamp = nsamp * 2
-                            nbi = nbi * 2
+                            #nbi = nbi * 2
                             print('nsamp = ' + str(nsamp))
                             T0,T1,M0,M1, convwarning = estimate_vslite_params_v2_3(T,P,df_t['lat'].values[0],RW,[3,11],
                                                                              nsamp, nbi, varargin=None)       
