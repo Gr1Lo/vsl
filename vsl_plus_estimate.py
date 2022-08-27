@@ -1419,7 +1419,7 @@ def estimate_and_compute_VSL(df, st_year, end_year,
               nbi = 200
               while result is None:
                   try:
-                      T0,T1,M0,M1, convwarning = estimate_vslite_params_v2_3(T,P,df_t['lat'].values[0],RW,[5,9],
+                      T0,T1,M0,M1, convwarning = estimate_vslite_params_v2_3(T,P,df_t['lat'].values[0],RW,[3,11],
                                                                              nsamp, nbi, varargin=None)
                       print(T0,T1,M0,M1, convwarning)
                       '''
@@ -1436,7 +1436,7 @@ def estimate_and_compute_VSL(df, st_year, end_year,
               
               res = np.round(VSLite_v2_5(st_year,end_year,
                                         df_t['lat'].values[0],
-                                        T0,T1,M0,M1,T_pred,P_pred,[5,9], varargin=None),3)
+                                        T0,T1,M0,M1,T_pred,P_pred,[3,11], varargin=None),3)
               
               all_res.append(res)
               lat_lon_list.append([lat_ind, lon_ind])
