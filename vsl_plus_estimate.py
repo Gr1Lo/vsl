@@ -1326,7 +1326,7 @@ def VSLite_v2_5(syear,eyear,phi,T1,T2,M1,M2,T,P, intwindow, varargin=None):
             startmo = I_0; #+1???
             endmo = I_f;
             for cyear in range(nyrs):
-                width[cyear-1] = np.sum(Gr[startmo:endmo,cyear])
+                width[cyear] = np.sum(Gr[startmo:endmo,cyear])
 
 
     elif phi<0: #if site is in the Southern Hemisphere:
