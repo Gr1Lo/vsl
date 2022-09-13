@@ -1371,7 +1371,7 @@ def estimate_and_compute_VSL(df, st_year, end_year,
           lat_ind = (np.abs(df_t['lat'].values[0] - ret_lat)).argmin()
           lon_ind = (np.abs(df_t['lon'].values[0] - ret_lon)).argmin()
 
-          if 1:#[lat_ind, lon_ind] not in lat_lon_list:
+          if [lat_ind, lon_ind] not in lat_lon_list:
 
               print('Расчет для точки ' +str(cou) + ' с индексом (CMIP_6) ' + str(lat_ind) + ' ' + str(lon_ind))
 
