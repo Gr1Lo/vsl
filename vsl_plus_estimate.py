@@ -489,7 +489,6 @@ def estimate_vslite_params_v2_3(T,P,phi,RW,intwindow, nsamp, nbi, varargin=None)
 
         exec('logLchains.append(logLchain{})'.format(str(i)))
 
-
         exec('Ttensemb.extend(Ttchain{}[nbi:])'.format(str(i)))
         exec('Toensemb.extend(Tochain{}[nbi:])'.format(str(i)))
         exec('Moensemb.extend(Mochain{}[nbi:])'.format(str(i)))
@@ -506,65 +505,70 @@ def estimate_vslite_params_v2_3(T,P,phi,RW,intwindow, nsamp, nbi, varargin=None)
 
         exec('logLensemb.extend(logLchain{}[nbi:])'.format(str(i)))
 
-    if pt_ests == 'med':
-        T1 = np.median(Ttensemb)
-        T2 = np.median(Toensemb)
-        M1 = np.median(Mtensemb)
-        M2 = np.median(Moensemb)
-        if errormod == 0:
-            sig2rw = np.median(sig2rwensemb)
-        elif errormod == 1:
-            phi1hat = np.median(phi1ensemb)
-            tau2hat = np.median(tau2ensemb)
-        
-    elif pt_ests == 'mle':
-        logLensemb = np.array(logLensemb)
-        mle_ind = np.argwhere(logLensemb==np.max(logLensemb))[0][0]
-        '''if len(mle_ind)>1:
-                                    mle_ind = mle_ind[0]'''
-
-        T1 = Ttensemb[mle_ind]
-        T2 = Toensemb[mle_ind]
-        M1 = Mtensemb[mle_ind]
-        M2 = Moensemb[mle_ind]
-        if errormod == 0:
-            sig2rw = sig2rwensemb[mle_ind]
-        elif errormod == 1:
-            phi1hat = phi1ensemb[mle_ind]
-            tau2hat = tau2ensemb[mle_ind]
-
-    exec('global RhatT1; RhatT1 = gelmanrubin92(nsamp,nbi,Ttchains)')
-    exec('global RhatT2; RhatT2 = gelmanrubin92(nsamp,nbi,Tochains)')
-    exec('global RhatM1; RhatM1 = gelmanrubin92(nsamp,nbi,Mtchains)')
-    exec('global RhatM2; RhatM2 = gelmanrubin92(nsamp,nbi,Mochains)')
-
-    if errormod == 0:
-        exec('global Rhatsig2rw;Rhatsig2rw = gelmanrubin92(nsamp,nbi,sig2rwchains)')
-    elif errormod == 1:
-        exec('global Rhatphi1;Rhatphi1 = gelmanrubin92(nsamp,nbi,phi1chains)')
-        exec('global Rhattau2;Rhattau2 = gelmanrubin92(nsamp,nbi,tau2chains)')
-
-    Rhats = [RhatT1, RhatT2, RhatM1, RhatM2]
-
-    if verbose == 1:
-        if errormod == 0:
-            Rhats.append(Rhatsig2rw)
-            print('    Rhat for T1, T2, M1, M2, sigma2rw:')
-            print([RhatT1, RhatT2, RhatM1, RhatM2, Rhatsig2rw])
-        elif errormod == 1:
-            Rhats.append(Rhatphi1).append(Rhattau2)
-            print('    Rhat for T1, T2, M1, M2, phi1, tau2:')
-            print([RhatT1, RhatT2, RhatM1, RhatM2, Rhatphi1, Rhattau2])
-
-    if np.any(np.abs(np.array(Rhats)-1)>convthresh):
-        print('Gelman and Rubin metric suggests MCMC has not yet converged to within desired threshold;')
-        print('Parameter estimation code should be re-run using a greater number of MCMC iterations.')
-        print('(See ''nsamp'' advanced input option.)')
-        convwarning = 1
+    if (np.isnan(logLensemb).any()):
+        print('=================================Chain contains Nan======================')
+        return -9999999,-9999999,-9999999,-9999999,-9999999
     else:
-        convwarning = 0
+      if pt_ests == 'med':
+          T1 = np.median(Ttensemb)
+          T2 = np.median(Toensemb)
+          M1 = np.median(Mtensemb)
+          M2 = np.median(Moensemb)
+          if errormod == 0:
+              sig2rw = np.median(sig2rwensemb)
+          elif errormod == 1:
+              phi1hat = np.median(phi1ensemb)
+              tau2hat = np.median(tau2ensemb)
 
-    return T1,T2,M1,M2,convwarning
+      elif pt_ests == 'mle':
+          logLensemb = np.array(logLensemb)
+          mle_ind = np.argwhere(logLensemb==np.max(logLensemb))[0][0]
+
+          '''if len(mle_ind)>1:
+                                      mle_ind = mle_ind[0]'''
+
+          T1 = Ttensemb[mle_ind]
+          T2 = Toensemb[mle_ind]
+          M1 = Mtensemb[mle_ind]
+          M2 = Moensemb[mle_ind]
+          if errormod == 0:
+              sig2rw = sig2rwensemb[mle_ind]
+          elif errormod == 1:
+              phi1hat = phi1ensemb[mle_ind]
+              tau2hat = tau2ensemb[mle_ind]
+
+      exec('global RhatT1; RhatT1 = gelmanrubin92(nsamp,nbi,Ttchains)')
+      exec('global RhatT2; RhatT2 = gelmanrubin92(nsamp,nbi,Tochains)')
+      exec('global RhatM1; RhatM1 = gelmanrubin92(nsamp,nbi,Mtchains)')
+      exec('global RhatM2; RhatM2 = gelmanrubin92(nsamp,nbi,Mochains)')
+
+      if errormod == 0:
+          exec('global Rhatsig2rw;Rhatsig2rw = gelmanrubin92(nsamp,nbi,sig2rwchains)')
+      elif errormod == 1:
+          exec('global Rhatphi1;Rhatphi1 = gelmanrubin92(nsamp,nbi,phi1chains)')
+          exec('global Rhattau2;Rhattau2 = gelmanrubin92(nsamp,nbi,tau2chains)')
+
+      Rhats = [RhatT1, RhatT2, RhatM1, RhatM2]
+
+      if verbose == 1:
+          if errormod == 0:
+              Rhats.append(Rhatsig2rw)
+              print('    Rhat for T1, T2, M1, M2, sigma2rw:')
+              print([RhatT1, RhatT2, RhatM1, RhatM2, Rhatsig2rw])
+          elif errormod == 1:
+              Rhats.append(Rhatphi1).append(Rhattau2)
+              print('    Rhat for T1, T2, M1, M2, phi1, tau2:')
+              print([RhatT1, RhatT2, RhatM1, RhatM2, Rhatphi1, Rhattau2])
+
+      if np.any(np.abs(np.array(Rhats)-1)>convthresh):
+          print('Gelman and Rubin metric suggests MCMC has not yet converged to within desired threshold;')
+          print('Parameter estimation code should be re-run using a greater number of MCMC iterations.')
+          print('(See ''nsamp'' advanced input option.)')
+          convwarning = 1
+      else:
+          convwarning = 0
+
+      return T1,T2,M1,M2,convwarning
 
 #LEAKY BUCKET WITHOUT SUBSTEPPING 
 def leakybucket_monthly(syear,eyear,phi,T,P,Mmax,Mmin,alph,m_th,mu_th,rootd,M0):
@@ -838,7 +842,7 @@ def TM_aux(mVar_curr,mVar,mVaro,gM,RW,errorpars,gE,Gterms,intwindow,cyrs,m_type,
             tau2 = errorpars[1]
             sigma2rw = tau2/(1-phi1**2)
 
-            iSig = makeAR1covmat(phi1,tau2,length(cyrs))
+            iSig = makeAR1covmat(phi1,tau2,len(cyrs))
             
             Wcurr = ((np.sum(gcurr[:,cyrs])-np.mean(np.sum(gcurr)))/np.std(np.sum(gcurr))).T
             Wprop = ((np.sum(gprop[:,cyrs])-np.mean(np.sum(gprop)))/np.std(np.sum(gprop))).T
@@ -1419,30 +1423,32 @@ def estimate_and_compute_VSL(df, st_year, end_year,
               result = None
               nsamp = nsamp#1000
               nbi = 200
+              
               while result is None:
                   try:
                       T0,T1,M0,M1, convwarning = estimate_vslite_params_v2_3(T,P,df_t['lat'].values[0],RW,[3,11],
                                                                              nsamp, nbi, varargin=None)
                       print(T0,T1,M0,M1, convwarning)
-                      '''
+                      """
                       while convwarning == 1:
                             nsamp = nsamp * 20
                             #nbi = nbi * 2
                             print('nsamp = ' + str(nsamp))
                             T0,T1,M0,M1, convwarning = estimate_vslite_params_v2_3(T,P,df_t['lat'].values[0],RW,[3,11],
                                                                              nsamp, nbi, varargin=None)
-                            print(T0,T1,M0,M1, convwarning)'''
+                            print(T0,T1,M0,M1, convwarning)"""
                       result = 1
                   except:
                       pass
+
+              if T0 != -9999999:
+                res = np.round(VSLite_v2_5(st_year,end_year,
+                                          df_t['lat'].values[0],
+                                          T0,T1,M0,M1,T_pred,P_pred,[3,11], varargin=None),3)
               
-              res = np.round(VSLite_v2_5(st_year,end_year,
-                                        df_t['lat'].values[0],
-                                        T0,T1,M0,M1,T_pred,P_pred,[3,11], varargin=None),3)
-              
-              all_res.append(res)
-              lat_lon_list.append([lat_ind, lon_ind])
-              print(T0,T1,M0,M1)
+                all_res.append(res)
+                lat_lon_list.append([lat_ind, lon_ind])
+                print(T0,T1,M0,M1)
 
     vsl_1000 = np.array(all_res).T#[:,0,:]
     return vsl_1000, lat_lon_list
