@@ -1419,6 +1419,8 @@ def estimate_and_compute_VSL(df, st_year, end_year,
               RW = df_t0.to_numpy().T[0]
 
               Tm=np.nanmean(T, axis=1)
+              if len(Tm) !=12 :
+                    return
 
               result = None
               nsamp = nsamp#1000
