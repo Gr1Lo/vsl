@@ -1351,6 +1351,7 @@ def estimate_and_compute_VSL(df, st_year, end_year,
     all_res = []
     cou = 0
     for fn in (df['file_name'].unique()):
+      print(fn)
       df_t = df[df['file_name']==fn]
       df_t = df_t[df_t['age'].isin(tr_t_df_nn['year'].unique())]
 
