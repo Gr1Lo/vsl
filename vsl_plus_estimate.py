@@ -4,7 +4,8 @@ warnings.filterwarnings("ignore")
 #original work: https://www1.ncdc.noaa.gov/pub/data/paleo/softlib/vs-lite/
 
 import numpy as np
-#np.random.seed(1222)
+m_ss = 1222
+np.random.seed(m_ss)
 from scipy.stats import zscore
 import pandas as pd
 import sys
