@@ -1422,6 +1422,7 @@ def estimate_and_compute_VSL(df, st_year, end_year,
               if len(Tm) ==12 :
                 nsamp = nsamp#1000
                 nbi = 200
+                result = None
                 
                 while result is None:
                     try:
