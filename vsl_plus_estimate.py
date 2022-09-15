@@ -1419,38 +1419,35 @@ def estimate_and_compute_VSL(df, st_year, end_year,
               RW = df_t0.to_numpy().T[0]
 
               Tm=np.nanmean(T, axis=1)
-              if len(Tm) !=12 :
-                    return
+              if len(Tm) ==12 :
+                nsamp = nsamp#1000
+                nbi = 200
+                
+                while result is None:
+                    try:
+                        T0,T1,M0,M1, convwarning = estimate_vslite_params_v2_3(T,P,df_t['lat'].values[0],RW,[3,11],
+                                                                              nsamp, nbi, varargin=None)
+                        print(T0,T1,M0,M1, convwarning)
+                        """
+                        while convwarning == 1:
+                              nsamp = nsamp * 20
+                              #nbi = nbi * 2
+                              print('nsamp = ' + str(nsamp))
+                              T0,T1,M0,M1, convwarning = estimate_vslite_params_v2_3(T,P,df_t['lat'].values[0],RW,[3,11],
+                                                                              nsamp, nbi, varargin=None)
+                              print(T0,T1,M0,M1, convwarning)"""
+                        result = 1
+                    except:
+                        pass
 
-              result = None
-              nsamp = nsamp#1000
-              nbi = 200
-              
-              while result is None:
-                  try:
-                      T0,T1,M0,M1, convwarning = estimate_vslite_params_v2_3(T,P,df_t['lat'].values[0],RW,[3,11],
-                                                                             nsamp, nbi, varargin=None)
-                      print(T0,T1,M0,M1, convwarning)
-                      """
-                      while convwarning == 1:
-                            nsamp = nsamp * 20
-                            #nbi = nbi * 2
-                            print('nsamp = ' + str(nsamp))
-                            T0,T1,M0,M1, convwarning = estimate_vslite_params_v2_3(T,P,df_t['lat'].values[0],RW,[3,11],
-                                                                             nsamp, nbi, varargin=None)
-                            print(T0,T1,M0,M1, convwarning)"""
-                      result = 1
-                  except:
-                      pass
-
-              if T0 != -9999999:
-                res = np.round(VSLite_v2_5(st_year,end_year,
-                                          df_t['lat'].values[0],
-                                          T0,T1,M0,M1,T_pred,P_pred,[3,11], varargin=None),3)
-              
-                all_res.append(res)
-                lat_lon_list.append([lat_ind, lon_ind])
-                print(T0,T1,M0,M1)
+                if T0 != -9999999:
+                  res = np.round(VSLite_v2_5(st_year,end_year,
+                                            df_t['lat'].values[0],
+                                            T0,T1,M0,M1,T_pred,P_pred,[3,11], varargin=None),3)
+                
+                  all_res.append(res)
+                  lat_lon_list.append([lat_ind, lon_ind])
+                  print(T0,T1,M0,M1)
 
     vsl_1000 = np.array(all_res).T#[:,0,:]
     return vsl_1000, lat_lon_list
