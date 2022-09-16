@@ -1441,7 +1441,7 @@ def estimate_and_compute_VSL(df, st_year, end_year,
                     except:
                         pass
 
-                if T0 != -9999999:
+                if T0 != -9999999 and T_pred:
                   res = np.round(VSLite_v2_5(st_year,end_year,
                                             df_t['lat'].values[0],
                                             T0,T1,M0,M1,T_pred,P_pred,[3,11], varargin=None),3)
