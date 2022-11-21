@@ -6,6 +6,9 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 import scipy
 
+from rpy2.robjects import pandas2ri
+pandas2ri.activate()
+
 def visualization(da, pcs, eofs_da, evf, n, dims, var_name = 'scpdsi'):
     fig = plt.figure(figsize = (12,2.5*n))
 
