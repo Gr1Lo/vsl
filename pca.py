@@ -6,7 +6,6 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 import scipy
 
-
 def visualization(da, pcs, eofs_da, evf, n, dims, var_name = 'scpdsi'):
     fig = plt.figure(figsize = (12,2.5*n))
 
@@ -37,7 +36,7 @@ def visualization(da, pcs, eofs_da, evf, n, dims, var_name = 'scpdsi'):
     plt.show()
 
 def eof_an(df_clim_index, ds_n, n = 10, scale_type = 0, pca_type = "varimax", evfs_lower_limit = 0, dims = ["latitude","longitude"],
-          plots=False, var_name = 'scpdsi'):
+          plots=False, var_name = 'scpdsi', mask = None):
 
     '''
     EOF-анализ
@@ -49,26 +48,36 @@ def eof_an(df_clim_index, ds_n, n = 10, scale_type = 0, pca_type = "varimax", ev
     plots - выводить изображения EOF
     '''
     evfs = [0]
+    train = df_clim_index
+    if mask is not None:
+      train = df_clim_index.iloc[:len(m_mask)][mask]
+      test = df_clim_index.iloc[:len(m_mask)][~mask]
 
     while np.sum(evfs)<=evfs_lower_limit:
-        pca = df_eof(df_clim_index,pca_type=pca_type,n_components=n)
+        pca = df_eof(train,pca_type=pca_type,n_components=n)
         evfs = pca.evf(n=n)
         print('Количество EOF: '+ str(n), '; Доля объясненной дисперсии: ' + str(round(np.sum(evfs),3)))
         n = n+1
     
     n = n-1
-
     eofs = pca.eofs(s=scale_type, n=n)
-
     eofs_da = eofs.stack(dims).to_xarray()
     pcs = pca.pcs(s=scale_type, n=n)
     eigvals = pca.eigvals(n=n)
+
+    if mask is not None:
+      pca = df_eof(train,df_test=test,pca_type=pca_type,n_components=n)
+      eofs_test = pca.eofs(s=scale_type, n=n)
+      pcs_test = pca.pcs(s=scale_type, n=n)
 
     # plot
     if plots:
         visualization(ds_n, pcs, eofs_da, evfs, n, dims, var_name)
 
-    return (pca, eofs, pcs, evfs, eigvals, n)
+    if mask is None:
+      return (pca, eofs, pcs, evfs, eigvals, n)
+    else:
+      return (pca, eofs, pcs, evfs, eigvals, n, eofs_test, pcs_test)
   
   
 def pca_tr(trsgi, n = 10, pcas_lower_limit = 0):
