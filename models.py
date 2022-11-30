@@ -582,6 +582,113 @@ def rev_diff(y_pred, y_true, eofs, eigvals, pca, for_shape, ttl, p_type='diff', 
 
         return loss0
       
+def rev_diff_m(y_pred, y_true, ttl, p_type='diff'):
+       
+        """
+        Visual assessment of prediction results:
+        y_pred - predicted components values, 
+        y_true - test scpdsi values scpdsi, 
+        ttl - name of model, 
+        p_type - verification metrics
+                  'mae' - mean absolute error
+                  'corr' - Spearman's Rank correlation coefficient
+                  'd' - index of agreement “d”
+                  'nse' - Nash-Sutcliffe Efficiency
+        """
+
+        u = np.reshape(y_pred, (y_pred.shape[0],-1))
+        u0 = np.reshape(y_true, (y_true.shape[0],-1))
+
+        if p_type=='corr':
+          coor_ar = []
+          for i in range(u0.shape[1]):
+            i1 = u[:,i]
+            i0 = u0[:,i]
+            
+            if ~np.isnan(i0[0]):
+              i0 = i0[~np.isnan(i1)]
+              i1 = i1[~np.isnan(i1)]
+              corr2 = scipy.stats.spearmanr(i0,i1)[0]
+              coor_ar.append(corr2)
+            else:
+              coor_ar.append(np.nan)
+
+          loss0 = np.array(coor_ar)
+          ttl_str = " average Spearman's Rank correlation coefficient = "
+          vmin = -1
+          vmax = 1
+
+        elif p_type == 'mae':
+          mae_ar = []
+          for i in range(u0.shape[1]):
+            i1 = u[:,i]
+            i0 = u0[:,i]
+            if ~np.isnan(i0[0]):
+              i0 = i0[~np.isnan(i1)]
+              i1 = i1[~np.isnan(i1)]
+              mae2 = np.mean(np.abs(i1 - i0))
+              mae_ar.append(mae2)
+            else:
+              mae_ar.append(np.nan)
+              
+          ttl_str = '; mean absolute error = '
+          loss0 = np.array(mae_ar)
+          vmin = 0
+          vmax = 8
+
+        elif p_type == 'nse':
+          nse_ar = []
+          for i in range(u0.shape[1]):
+            i1 = u[:,i]
+            i0 = u0[:,i]
+            if ~np.isnan(i0[0]):
+              i0 = i0[~np.isnan(i1)]
+              i1 = i1[~np.isnan(i1)]
+              nse2 = nse(i0,i1)
+              nse_ar.append(nse2)
+            else:
+              nse_ar.append(np.nan)
+
+          loss0 = np.array(nse_ar)
+          ttl_str = '; Nash-Sutcliff-Efficiency = '
+          vmin = 0
+          vmax = 1
+
+        elif p_type == 'd':
+          nse_ar = []
+          for i in range(u0.shape[1]):
+            i1 = u[:,i]
+            i0 = u0[:,i]
+            if ~np.isnan(i0[0]):
+              i0 = i0[~np.isnan(i1)]
+              i1 = i1[~np.isnan(i1)]
+              nse2 = d_index(i0,i1)
+              nse_ar.append(nse2)
+            else:
+              nse_ar.append(np.nan)
+
+          loss0 = np.array(nse_ar)
+          ttl_str = '; d-index = '
+          vmin = 0
+          vmax = 1
+
+        new = np.reshape(loss0, (-1, y_pred.shape[2]))
+        plt.figure(figsize = (19,10))
+        im = plt.imshow(new, interpolation='none',
+                        vmin=vmin, vmax=vmax,cmap='jet')
+
+        cbar = plt.colorbar(im,
+                            orientation='vertical')
+        plt.axis('off')
+        plt.tight_layout()
+
+        loss0 = np.nanmean(loss0)
+
+        plt.title(ttl + ttl_str + str(round(loss0,3)),fontsize=20)
+        plt.show()
+
+        return loss0
+      
       
       
 def plot_model(vsl_1000_pc_tr, 
