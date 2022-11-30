@@ -237,7 +237,8 @@ def nse(targets,predictions):
 def d_index(targets,predictions):
     return 1-(np.sum((targets-predictions)**2)/np.sum((np.abs(predictions-np.mean(targets))+np.abs(targets-np.mean(targets)))**2))
     
-
+def RE_CE(targets,predictions):
+    return 1 - np.sum((targets-predictions)**2) / np.sum((targets-np.mean(targets))**2)
 
 
 
@@ -530,6 +531,22 @@ def rev_diff(y_pred, y_true, eofs, eigvals, pca, for_shape, ttl, p_type='diff', 
           loss0 = np.array(nse_ar)
           ttl_str = '; Nash-Sutcliff-Efficiency = '
           vmin = 0
+          vmax = 1
+          
+        elif p_type == 'CE':
+          re_ce_ar = []
+          for i in range(u0.shape[1]):
+            i1 = u[:,i]
+            i0 = u0[:,i]
+            if ~np.isnan(i0[0]):
+              re_ce = RE_CE(i0,i1)
+              re_ce_ar.append(re_ce)
+            else:
+              re_ce_ar.append(np.nan)
+
+          loss0 = np.array(re_ce_ar)
+          ttl_str = '; CE = '
+          vmin = -1
           vmax = 1
 
         elif p_type == 'd':
