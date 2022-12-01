@@ -158,8 +158,8 @@ def eppr_regions(pcs, eofs_da, pcs_test, eofs_da_test, trsgi_df, sort_lon, sort_
     #p_list = [1]
     
     trsgi_df1 = trsgi_df.copy()
-    '''st_year, end_year = max_min_year_trsgi(trsgi_df)
-    range_years = list(range(st_year,end_year+1))'''
+    st_year, end_year = max_min_year_trsgi(trsgi_df)
+    range_years = list(range(st_year,end_year+1))
 
     #filling missing years by zeros
     trsgi_df1["corr"] = 1
