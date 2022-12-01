@@ -22,7 +22,7 @@ def max_min_year_trsgi(trsgi_df):
 
 def eppr(grid, trsgi_df, sort_lon, sort_lat, search_rad, mask, single = False):
   #single - select the most correlated pseuproxy
-  result = np.empty(shape=(len(m_mask[~m_mask]),grid.shape[1],grid.shape[2]))
+  result = np.empty(shape=(len(mask[~mask]),grid.shape[1],grid.shape[2]))
   result[:] = np.nan
 
   p_list = [0,0.1,0.25,0.5,0.67,1,1.5,2]
@@ -57,7 +57,7 @@ def eppr(grid, trsgi_df, sort_lon, sort_lat, search_rad, mask, single = False):
       cou+= 1
       if 1:
         print(cou)
-        m_g = grid[:,i_lat,i_lon][m_mask]
+        m_g = grid[:,i_lat,i_lon][mask]
         m_g0 = grid[:,i_lat,i_lon]
         if all(~np.isnan(v) for v in m_g):
           lat_coor = sort_lat[i_lat]
@@ -66,7 +66,7 @@ def eppr(grid, trsgi_df, sort_lon, sort_lat, search_rad, mask, single = False):
                                           (row.geo_meanLon-lon_coor)**2)**0.5, axis=1)
           if single:
             trsgi_df1['corr'] = trsgi_df1.apply(lambda row: np.round(np.corrcoef
-                                                                      (np.array(row['trsgi'])[m_mask],m_g)
+                                                                      (np.array(row['trsgi'])[mask],m_g)
                                                                       [0][1],3), axis=1)
             #c_maxes = trsgi_df1.groupby(['geo_meanLat', 'geo_meanLon'])['corr'].transform(max)
             trsgi_df1 = trsgi_df1.sort_values('corr').drop_duplicates(
@@ -85,7 +85,7 @@ def eppr(grid, trsgi_df, sort_lon, sort_lat, search_rad, mask, single = False):
             corr_p_l = []
             for index, row in trsgi_df2.iterrows():
                 uTR_list.append(row['trsgi'])
-                corr_p = np.round(np.corrcoef(np.array(row['trsgi'])[m_mask], m_g)[0][1],3)
+                corr_p = np.round(np.corrcoef(np.array(row['trsgi'])[mask], m_g)[0][1],3)
                 corr_p_l.append([corr_p+0.0011]*len(row['trsgi']))
                 #corr_list.append(np.array(row['corr'])*(np.abs(corr_p)+0.001))
 
@@ -100,12 +100,12 @@ def eppr(grid, trsgi_df, sort_lon, sort_lat, search_rad, mask, single = False):
             pc_sum=0
             n_c = 3
             while pc_sum < 0.9:
-              principalComponents = WPCA(n_components=n_c).fit(wTR_arr[m_mask], weights = corr_arr[m_mask])
+              principalComponents = WPCA(n_components=n_c).fit(wTR_arr[mask], weights = corr_arr[mask])
               pc_sum = np.sum(principalComponents.explained_variance_ratio_)
               n_c+=2
               '''print('res ',pc_sum, n_c)
               if n_c == 11:
-                principalComponents = WPCA(n_components=10).fit(wTR_arr[m_mask], weights = corr_arr[m_mask])
+                principalComponents = WPCA(n_components=10).fit(wTR_arr[mask], weights = corr_arr[mask])
                 pc_sum = 1'''
 
             principalComponents0 = principalComponents.transform(wTR_arr)
