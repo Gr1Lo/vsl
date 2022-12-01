@@ -50,8 +50,8 @@ def eof_an(df_clim_index, ds_n, n = 10, scale_type = 0, pca_type = "varimax", ev
     evfs = [0]
     train = df_clim_index
     if mask is not None:
-      train = df_clim_index.iloc[:len(m_mask)][mask]
-      test = df_clim_index.iloc[:len(m_mask)][~mask]
+      train = df_clim_index.iloc[:len(mask)][mask]
+      test = df_clim_index.iloc[:len(mask)][~mask]
 
     while np.sum(evfs)<=evfs_lower_limit:
         pca = df_eof(train,pca_type=pca_type,n_components=n)
