@@ -314,7 +314,7 @@ def eppr_PLSR(grid, pcs, eofs_da, trsgi_df, sort_lon, sort_lat, var_name, search
         m_g = grid[:,i_lat,i_lon]
         cou1+= 1
         if all(~np.isnan(v) for v in m_g):
-          cou = 0
+          '''cou = 0
           for column in pcs:
             df_pcs = pcs[column]
             indices = np.argwhere(np.abs(eofs_da.sel(EOF=cou+1)[var_name].values)> thr)
@@ -328,14 +328,15 @@ def eppr_PLSR(grid, pcs, eofs_da, trsgi_df, sort_lon, sort_lat, var_name, search
               if min_dist >= closest_in_grid:
                   all_regions = np.append(all_regions, lats_lons, axis=0)
 
-            cou+= 1
+              cou+= 1
 
-          if len(all_regions) > 1:
-            all_regions = all_regions[1:]
-            new_array = [tuple(row) for row in all_regions]
-            regs = np.unique(new_array, axis=0)
-            #regs = all_regions
-          else:
+            if len(all_regions) > 1:
+              all_regions = all_regions[1:]
+              new_array = [tuple(row) for row in all_regions]
+              regs = np.unique(new_array, axis=0)
+              #regs = all_regions
+            else:'''
+          if 1:
             regs = [[sort_lat[i_lat], sort_lon[i_lon]]]
 
           lat_coor = sort_lat[i_lat]
