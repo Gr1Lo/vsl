@@ -268,7 +268,7 @@ def eppr_regions(pcs, eofs_da, pcs_test, eofs_da_test, trsgi_df, sort_lon, sort_
   return all_preds
 
 
-def eppr_PLSR(grid, pcs, eofs_da, trsgi_df, sort_lon, sort_lat, var_name, search_rad, mask, thr=0.3,pick=False):
+def eppr_PLSR(grid, trsgi_df, sort_lon, sort_lat, var_name, search_rad, mask, thr=0.3,pick=False):
   result = np.empty(shape=(len(mask[~mask]),grid.shape[1],grid.shape[2]))
   result[:] = np.nan
 
