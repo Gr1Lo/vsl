@@ -343,7 +343,7 @@ def eppr_PLSR(grid, trsgi_df, sort_lon, sort_lat, var_name, search_rad, mask, th
           lon_coor = sort_lon[i_lon]
 
           trsgi_df1['r'] = trsgi_df1.apply(lambda row: closest_node([row.geo_meanLat, row.geo_meanLon], regs), axis=1)
-          trsgi_df2 = trsgi_df1[trsgi_df1['r']<=np.abs(eofs_da.lat[0]-eofs_da.lat[1]).values]
+          trsgi_df2 = trsgi_df1[trsgi_df1['r']<=np.abs(sort_lat[0]-sort_lat[1])]
 
           if len(trsgi_df2) < 10:
             trsgi_df2 = trsgi_df1[trsgi_df1['r']<=search_rad]
