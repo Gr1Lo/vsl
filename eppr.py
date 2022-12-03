@@ -364,7 +364,7 @@ def eppr_PLSR(grid, pcs, eofs_da, trsgi_df, sort_lon, sort_lat, var_name, search
                     for index, row in trsgi_df2.iterrows():
                         uTR_list.append(row['trsgi'])
                         tem_l = len(row['trsgi'])
-                        corr_p = np.round(np.corrcoef(np.array(row['trsgi'])[mask[:tem_l]], 
+                        corr_p = np.round(np.corrcoef(np.array(row['trsgi'])[mask], 
                                                       m_g[mask])[0][1],3)
                         corr_p_l.append(corr_p)
                         corr_list.append(np.array(row['corr'])*(np.abs(corr_p)+0.001))
