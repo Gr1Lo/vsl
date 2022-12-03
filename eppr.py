@@ -268,7 +268,7 @@ def eppr_regions(pcs, eofs_da, pcs_test, eofs_da_test, trsgi_df, sort_lon, sort_
   return all_preds
 
 
-def eppr_PLSR(grid, trsgi_df, sort_lon, sort_lat, var_name, search_rad, mask, thr=0.3,pick=False):
+def eppr_PLSR(grid, pcs, eofs_da, trsgi_df, sort_lon, sort_lat, var_name, search_rad, mask, thr=0.3,pick=False):
   result = np.empty(shape=(len(mask[~mask]),grid.shape[1],grid.shape[2]))
   result[:] = np.nan
 
@@ -314,29 +314,32 @@ def eppr_PLSR(grid, trsgi_df, sort_lon, sort_lat, var_name, search_rad, mask, th
         m_g = grid[:,i_lat,i_lon]
         cou1+= 1
         if all(~np.isnan(v) for v in m_g):
-          '''cou = 0
-          for column in pcs:
-            df_pcs = pcs[column]
-            indices = np.argwhere(np.abs(eofs_da.sel(EOF=cou+1)[var_name].values)> thr)
-            t1 = eofs_da.lat[indices[:,0]]
-            t2 = eofs_da.lon[indices[:,1]]
-            lats_lons = np.array([t1,t2]).T # пары широт и долгот в eof-регионе поиска
+          if eofs_da is not None and pcs is not None:
+            cou = 0
+            for column in pcs:
+              df_pcs = pcs[column]
+              indices = np.argwhere(np.abs(eofs_da.sel(EOF=cou+1)[var_name].values)> thr)
+              t1 = eofs_da.lat[indices[:,0]]
+              t2 = eofs_da.lon[indices[:,1]]
+              lats_lons = np.array([t1,t2]).T # пары широт и долгот в eof-регионе поиска
 
-            if len(lats_lons)>0: 
-              closest_in_grid = closest_node([sort_lat[i_lat], sort_lon[i_lon]], lats_lons)
-              min_dist = np.abs(eofs_da.lat[0]-eofs_da.lat[1])*1.1
-              if min_dist >= closest_in_grid:
-                  all_regions = np.append(all_regions, lats_lons, axis=0)
+              if len(lats_lons)>0: 
+                closest_in_grid = closest_node([sort_lat[i_lat], sort_lon[i_lon]], lats_lons)
+                min_dist = np.abs(eofs_da.lat[0]-eofs_da.lat[1])*1.1
+                if min_dist >= closest_in_grid:
+                    all_regions = np.append(all_regions, lats_lons, axis=0)
 
-              cou+= 1
+                cou+= 1
 
-            if len(all_regions) > 1:
-              all_regions = all_regions[1:]
-              new_array = [tuple(row) for row in all_regions]
-              regs = np.unique(new_array, axis=0)
-              #regs = all_regions
-            else:'''
-          if 1:
+              if len(all_regions) > 1:
+                all_regions = all_regions[1:]
+                new_array = [tuple(row) for row in all_regions]
+                regs = np.unique(new_array, axis=0)
+                #regs = all_regions
+              else:
+                regs = [[sort_lat[i_lat], sort_lon[i_lon]]]
+                
+          else:
             regs = [[sort_lat[i_lat], sort_lon[i_lon]]]
 
           lat_coor = sort_lat[i_lat]
