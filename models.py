@@ -17,6 +17,9 @@ from sklearn.model_selection import train_test_split
 np.random.seed(123)
 tf.random.set_seed(1234)
 
+
+
+
 def train_and_test(trsgi, labels, p_v, keep_order = False, m_mask=None):
   np.random.seed(123)
 
@@ -46,15 +49,16 @@ def train_and_test(trsgi, labels, p_v, keep_order = False, m_mask=None):
 
   return train_trsgi, train_labels, test_trsgi, test_labels
 
+
 #функция формирования тренировочного набора для RNN
 def make_x_y(ts, data):
-    """
+    '''
     Parameters
     ts : число шагов для RNN
     data : numpy array с предикторами
     x - наборы предикторов, в том числе и с предыдущих шагов
     y - предикторы только с действующего шага
-    """
+    '''
     x, y = [], []
     offset = 0
     for i in data:
@@ -159,7 +163,7 @@ def corr_loss(x, y):
 
 def simp_net_regression_1(trsgi_values, resp, ttl, model, shuffle_b, evfs = None, 
                           eofs = None, eigvals = None, pca = None, scale_type=2,
-                          use_w=False, min_delta = 0.001):
+                          use_w=False, min_delta = 0.0005):
 
     '''
     Запуск обучения модели регрессии
@@ -191,6 +195,7 @@ def simp_net_regression_1(trsgi_values, resp, ttl, model, shuffle_b, evfs = None
                                               l_pca = pca, 
                                               scale_type=scale_type))
     elif use_w=='corr':
+      min_delta = 0.05
       model.compile(optimizer=tf.keras.optimizers.Adam(lr=0.0005),
                   run_eagerly=True,
                   loss = corr_loss)
@@ -208,7 +213,7 @@ def simp_net_regression_1(trsgi_values, resp, ttl, model, shuffle_b, evfs = None
     else:
       trsgi_values, y = make_x_y(1, trsgi_values)
       #trsgi_values = np.reshape(trsgi_values, (trsgi_values.shape[0],1,trsgi_values.shape[1]))
-      callback = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=20, min_delta=0.001)
+      callback = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=20, min_delta=min_delta)
       v_s = 0.2
       all_arr = all_arr[1:]
 
@@ -236,9 +241,13 @@ def nse(targets,predictions):
 
 def d_index(targets,predictions):
     return 1-(np.sum((targets-predictions)**2)/np.sum((np.abs(predictions-np.mean(targets))+np.abs(targets-np.mean(targets)))**2))
+  
+def CE(targets,predictions):
+  '''print(targets)
+  print(predictions)'''
+  return 1 - np.sum((targets-predictions)**2) / np.sum((targets-np.mean(targets))**2)
     
-def RE_CE(targets,predictions):
-    return 1 - np.sum((targets-predictions)**2) / np.sum((targets-np.mean(targets))**2)
+
 
 
 
@@ -298,25 +307,18 @@ def run_model(vsl_1000_pc_tr,
         plt.legend(['loss', 'val_loss'], loc='upper left')
         plt.show()
         
-        '''score = model.evaluate(te_t, te_l, verbose=0)
-        print(score)
-        inverse_te_l = scaler_vsl_1000.inverse_transform(te_l)'''
+        #score = model.evaluate(te_t, te_l, verbose=0)
         est = model.predict(vsl_1000_pc_norm_test)
         inverse_est = scaler_vsl_1000.inverse_transform(est)
 
       
       elif type_m=='lm':
-        '''tr_t, tr_l, te_t, te_l = train_and_test(vsl_1000_pc_norm_tr, target_tr, 0.2, 
-                                                keep_order=False, m_mask=m_mask)'''
         model_0 = sm.OLS(target_tr, vsl_1000_pc_norm_tr)
         model = model_0.fit()
-
-        #inverse_te_l = scaler_vsl_1000.inverse_transform(te_l)
         est = model.predict(vsl_1000_pc_norm_test)
         inverse_est = scaler_vsl_1000.inverse_transform(est)
 
       elif type_m=='RNN':
-        
         trsgi_values0, y = make_x_y(1, vsl_1000_pc_norm_tr)
         inp_shp = trsgi_values0.shape
         #inp_shp = vsl_1000_pc_norm_tr.shape
@@ -421,12 +423,12 @@ def get_model_regression_RNN(n_inputs,
 
 
 
-  """rnn_l = tf.keras.layers.SimpleRNN(50, input_shape=(inp_shp[0], inp_shp[1]), recurrent_dropout=0.1, 
-                           return_sequences=True)
+  '''rnn_l = tf.keras.layers.SimpleRNN(50, input_shape=(inp_shp[0], inp_shp[1]), recurrent_dropout=0.1, 
+                           return_sequences=True)'''
   '''lstm = keras.layers.LSTM(50, input_shape=(inp_shp[1], inp_shp[2]), recurrent_dropout=0.1, 
                            return_sequences=True)'''
 
-  model.add(rnn_l)"""
+  #model.add(rnn_l)
   '''if use_batch_norm == True:
     model.add(BatchNormalization())'''
   if use_drop == True:
@@ -485,6 +487,16 @@ def rev_diff(y_pred, y_true, eofs, eigvals, pca, for_shape, ttl, p_type='diff', 
           Yhat0 = pca._scaler.inverse_transform(Yhat0)
           u0 = Yhat0
 
+        '''#####
+        scaler_0 = StandardScaler()
+        scaler_1 = StandardScaler()
+
+        # fit and transform 
+        u_ = scaler_0.fit_transform(u0)
+        u = scaler_1.fit_transform(u)
+        u = scaler_0.inverse_transform(u)
+        #####'''
+
         if p_type=='corr':
           coor_ar = []
           for i in range(u0.shape[1]):
@@ -532,22 +544,6 @@ def rev_diff(y_pred, y_true, eofs, eigvals, pca, for_shape, ttl, p_type='diff', 
           ttl_str = '; Nash-Sutcliff-Efficiency = '
           vmin = 0
           vmax = 1
-          
-        elif p_type == 'CE':
-          re_ce_ar = []
-          for i in range(u0.shape[1]):
-            i1 = u[:,i]
-            i0 = u0[:,i]
-            if ~np.isnan(i0[0]):
-              re_ce = RE_CE(i0,i1)
-              re_ce_ar.append(re_ce)
-            else:
-              re_ce_ar.append(np.nan)
-
-          loss0 = np.array(re_ce_ar)
-          ttl_str = '; CE = '
-          vmin = -1
-          vmax = 1
 
         elif p_type == 'd':
           nse_ar = []
@@ -564,7 +560,25 @@ def rev_diff(y_pred, y_true, eofs, eigvals, pca, for_shape, ttl, p_type='diff', 
           ttl_str = '; d-index = '
           vmin = 0
           vmax = 1
+        
+        elif p_type == 'CE':
+          nse_ar = []
+          for i in range(u0.shape[1]):
+            i1 = u[:,i]
+            i0 = u0[:,i]
+            if ~np.isnan(i0[0]):
+              i0 = i0[~np.isnan(i1)]
+              i1 = i1[~np.isnan(i1)]
+              nse2 = CE(i0,i1)
+              nse_ar.append(nse2)
+            else:
+              nse_ar.append(np.nan)
 
+          loss0 = np.array(nse_ar)
+          ttl_str = '; CE = '
+          vmin = -1
+          vmax = 1
+          
         new = np.reshape(loss0, (-1, for_shape))
         plt.figure(figsize = (19,10))
         im = plt.imshow(new, interpolation='none',
@@ -582,6 +596,119 @@ def rev_diff(y_pred, y_true, eofs, eigvals, pca, for_shape, ttl, p_type='diff', 
 
         return loss0
       
+      
+      
+def plot_model(vsl_1000_pc_tr, 
+               vsl_1000_pc_test,
+               t_df_tr,
+               t_df_test, 
+               pcs_tr,
+               evfs_tr, 
+               eofs_tr, 
+               eigvals_tr, 
+               pca_tr_v,
+               pca_tr, 
+               eofs_test,
+               pcs_test,
+               for_shape,
+               use_w,
+               ttl, 
+               p_type = 'corr',
+               type_model = 'NN'):
+  
+    print('\n' + ttl + '\n')
+    '''inverse_est = run_model(vsl_1000_pc_tr, 
+                            vsl_1000_pc_test,
+                            pcs_tr, 
+                            evfs_tr, 
+                                          eofs_tr, 
+                                          eigvals_tr, 
+                                          pca_tr_v, 
+                                          2, 
+                                          type_model, 
+                                          use_w=use_w)
+    
+
+    inv_rotmat = np.linalg.inv(pca_tr_v.rotmat_)
+    unord = inverse_est[:,np.argsort(pca_tr_v.order.ravel())]
+    unord_eofs = eofs_tr.to_numpy()[np.argsort(pca_tr_v.order.ravel())]
+    unord_eigvals = eigvals_tr[np.argsort(pca_tr_v.order.ravel())]'''
+
+    inverse_est = run_model(vsl_1000_pc_tr, 
+                            vsl_1000_pc_test,
+                            pcs_tr, 
+                            evfs_tr, 
+                                          eofs_tr, 
+                                          eigvals_tr, 
+                                          pca_tr_v, 
+                                          2, 
+                                          type_model, 
+                                          use_w=use_w)
+    
+    if type_model == 'RNN':
+      loss0 = rev_diff(np.dot(unord,inv_rotmat), 
+                      t_df_test.to_numpy()[1:], 
+                      np.dot(unord_eofs.T,inv_rotmat).T, 
+                      unord_eigvals, 
+                      pca_tr, 
+                      for_shape, 
+                      ttl + "\n", 
+                      p_type = p_type,
+                      scale_type = 2,
+                      orig_pcs=True)
+    else:
+      '''loss0 = rev_diff(np.dot(unord,inv_rotmat), 
+                      t_df_test.to_numpy(), 
+                      np.dot(unord_eofs.T,inv_rotmat).T, 
+                      unord_eigvals, 
+                      pca_tr, 
+                      for_shape, 
+                      ttl + "\n", 
+                      p_type = p_type,
+                      scale_type = 2,
+                      orig_pcs=True)'''
+      loss0 = rev_diff(inverse_est, 
+                      t_df_test.to_numpy(), 
+                      eofs_tr, 
+                      eigvals_tr, 
+                      pca_tr, 
+                      for_shape, 
+                      ttl + "\n", 
+                      p_type = p_type,
+                      scale_type = 2,
+                      orig_pcs=True)
+
+
+def get_model_regression_1(n_inputs, n_outputs, use_drop = False, use_batch_norm = False):
+
+  '''
+  Описание сети для задачи регрессии
+  n_inputs - число предикторов,
+  n_outputs - количество предсказываемых значений, по умоляанию 1
+  use_drop - параметр, отвечающий за рандомное отключение доли нейронов (30%)
+  use_batch_norm - параметр, отвечающий за использование batch-нормализации
+  '''
+
+  model = Sequential()
+  dr_v = 0.5
+
+  model.add(Dense(300, input_dim=n_inputs, kernel_initializer='normal', activation='linear'))
+  if use_batch_norm == True:
+    model.add(BatchNormalization())
+  if use_drop == True:
+    model.add(Dropout(dr_v))
+
+  '''model.add(Dense(100, input_dim=n_inputs, kernel_initializer='normal', activation='linear'))
+  if use_drop == True:
+    model.add(Dropout(dr_v))'''
+
+  
+  model.add(Dense(n_outputs, kernel_initializer='he_uniform'))
+  return model
+
+
+
+
 def rev_diff_m(y_pred, y_true, ttl, p_type='diff'):
        
         """
@@ -671,6 +798,26 @@ def rev_diff_m(y_pred, y_true, ttl, p_type='diff'):
           ttl_str = '; d-index = '
           vmin = 0
           vmax = 1
+          
+        elif p_type == 'CE':
+          nse_ar = []
+          for i in range(u0.shape[1]):
+            i1 = u[:,i]
+            i0 = u0[:,i]
+            if ~np.isnan(i0[0]):
+              i0 = i0[~np.isnan(i1)]
+              i1 = i1[~np.isnan(i1)]
+              nse2 = CE(i0,i1)
+              nse_ar.append(nse2)
+            else:
+              nse_ar.append(np.nan)
+
+          loss0 = np.array(nse_ar)
+          ttl_str = '; CE = '
+          vmin = -1
+          vmax = 1
+          
+        
 
         new = np.reshape(loss0, (-1, y_pred.shape[2]))
         plt.figure(figsize = (19,10))
@@ -688,93 +835,3 @@ def rev_diff_m(y_pred, y_true, ttl, p_type='diff'):
         plt.show()
 
         return loss0
-      
-      
-      
-def plot_model(vsl_1000_pc_tr, 
-               vsl_1000_pc_test,
-               t_df_tr,
-               t_df_test, 
-               pcs_tr,
-               evfs_tr, 
-               eofs_tr, 
-               eigvals_tr, 
-               pca_tr_v,
-               pca_tr, 
-               eofs_test,
-               pcs_test,
-               for_shape,
-               use_w,
-               ttl, 
-               p_type = 'corr',
-               type_model = 'NN'):
-  
-    print('\n' + ttl + '\n')
-    inverse_est = run_model(vsl_1000_pc_tr, 
-                            vsl_1000_pc_test,
-                            pcs_tr, 
-                            evfs_tr, 
-                                          eofs_tr, 
-                                          eigvals_tr, 
-                                          pca_tr_v, 
-                                          2, 
-                                          type_model, 
-                                          use_w=use_w)
-    
-
-    inv_rotmat = np.linalg.inv(pca_tr_v.rotmat_)
-    unord = inverse_est[:,np.argsort(pca_tr_v.order.ravel())]
-    unord_eofs = eofs_tr.to_numpy()[np.argsort(pca_tr_v.order.ravel())]
-    unord_eigvals = eigvals_tr[np.argsort(pca_tr_v.order.ravel())]
-
-    if type_model == 'RNN':
-      loss0 = rev_diff(np.dot(unord,inv_rotmat), 
-                      t_df_test.to_numpy()[1:], 
-                      np.dot(unord_eofs.T,inv_rotmat).T, 
-                      unord_eigvals, 
-                      pca_tr, 
-                      for_shape, 
-                      ttl + "\n", 
-                      p_type = p_type,
-                      scale_type = 2,
-                      orig_pcs=True)
-    else:
-      loss0 = rev_diff(np.dot(unord,inv_rotmat), 
-                      t_df_test.to_numpy(), 
-                      np.dot(unord_eofs.T,inv_rotmat).T, 
-                      unord_eigvals, 
-                      pca_tr, 
-                      for_shape, 
-                      ttl + "\n", 
-                      p_type = p_type,
-                      scale_type = 2,
-                      orig_pcs=True)
-
-
-def get_model_regression_1(n_inputs, n_outputs, use_drop = False, use_batch_norm = False):
-
-  '''
-  Описание сети для задачи регрессии
-  n_inputs - число предикторов,
-  n_outputs - количество предсказываемых значений, по умоляанию 1
-  use_drop - параметр, отвечающий за рандомное отключение доли нейронов (30%)
-  use_batch_norm - параметр, отвечающий за использование batch-нормализации
-  '''
-
-  model = Sequential()
-  dr_v = 0.4
-
-  model.add(Dense(300, input_dim=n_inputs, kernel_initializer='normal', activation='linear'))
-  if use_batch_norm == True:
-    model.add(BatchNormalization())
-  if use_drop == True:
-    model.add(Dropout(dr_v))
-
-  '''model.add(Dense(100, input_dim=n_inputs, kernel_initializer='normal', activation='linear'))
-  model.add(Dense(100, input_dim=n_inputs, kernel_initializer='normal', activation='linear'))'''
-  '''if use_drop == True:
-    model.add(Dropout(dr_v))'''
-
-  
-  model.add(Dense(n_outputs, kernel_initializer='he_uniform'))
-  return model
