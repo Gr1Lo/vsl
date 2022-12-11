@@ -22,7 +22,8 @@ def max_min_year_trsgi(trsgi_df):
 
 def eppr(grid, trsgi_df, sort_lon, sort_lat, search_rad, mask, single = False):
   #single - select the most correlated pseuproxy
-  result = np.empty(shape=(len(mask[~mask]),grid.shape[1],grid.shape[2]))
+  #result = np.empty(shape=(len(mask[~mask]),grid.shape[1],grid.shape[2]))
+  result = np.empty(shape=(len(mask),grid.shape[1],grid.shape[2]))
   result[:] = np.nan
 
   p_list = [0,0.1,0.25,0.5,0.67,1,1.5,2]
@@ -114,11 +115,11 @@ def eppr(grid, trsgi_df, sort_lon, sort_lat, search_rad, mask, single = False):
 
             tr_df0 = principalDf0[mask]
             tr_m_g = m_g0[:end_year+1-st_year][mask]
-            test_df0 = principalDf0[~mask]
-            test_m_g = m_g0[:end_year+1-st_year][~mask]
+            test_df0 = principalDf0#[~mask]
+            test_m_g = m_g0[:end_year+1-st_year]#[~mask]
 
             tr_zerosDf0 = zerosDf0[mask]
-            test_zerosDf0 = zerosDf0[~mask]
+            test_zerosDf0 = zerosDf0#[~mask]
 
             #drop all zeros
             tr_df = tr_df0[~(tr_zerosDf0 == 0).all(axis=1)]
@@ -269,7 +270,8 @@ def eppr_regions(pcs, eofs_da, pcs_test, eofs_da_test, trsgi_df, sort_lon, sort_
 
 
 def eppr_PLSR(grid, pcs, eofs_da, trsgi_df, sort_lon, sort_lat, var_name, search_rad, mask, thr=0.3,pick=False):
-  result = np.empty(shape=(len(mask[~mask]),grid.shape[1],grid.shape[2]))
+  #result = np.empty(shape=(len(mask[~mask]),grid.shape[1],grid.shape[2]))
+  result = np.empty(shape=(len(mask),grid.shape[1],grid.shape[2]))
   result[:] = np.nan
 
   all_preds = []
@@ -377,7 +379,8 @@ def eppr_PLSR(grid, pcs, eofs_da, trsgi_df, sort_lon, sort_lat, var_name, search
                     t_corr_arr = np.array(corr_list).T
                     corr_arr = np.where(t_corr_arr==0, 0, 1)
                     tr_mask = ~(wTR_arr[mask]==0).all(axis=1)
-                    test_mask = ~(wTR_arr[~mask]==0).all(axis=1)
+                    #test_mask = ~(wTR_arr[~mask]==0).all(axis=1)
+                    test_mask = ~(wTR_arr[mask]==0).all(axis=1)
 
                     
                     #####selecting best_ncomp######
@@ -403,9 +406,11 @@ def eppr_PLSR(grid, pcs, eofs_da, trsgi_df, sort_lon, sort_lat, var_name, search
 
                     best_model = PLSRegression(n_components=best_ncomp, scale=True)
                     best_model.fit(wTR_arr[mask][tr_mask], m_g[:end_year+1-st_year][mask][tr_mask])
-                    preds_PLSR = np.empty(shape=len(wTR_arr[~mask]))
+                    #preds_PLSR = np.empty(shape=len(wTR_arr[~mask]))
+                    preds_PLSR = np.empty(shape=len(wTR_arr))
                     preds_PLSR[:] = np.nan
-                    preds_PLSR[test_mask] = best_model.predict(wTR_arr[~mask][test_mask]).T[0]
+                    #preds_PLSR[test_mask] = best_model.predict(wTR_arr[~mask][test_mask]).T[0]
+                    preds_PLSR[test_mask] = best_model.predict(wTR_arr[test_mask]).T[0]
                     preds.append(preds_PLSR)
 
             preds = np.nanmean(preds, axis=0)
