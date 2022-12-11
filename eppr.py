@@ -380,7 +380,7 @@ def eppr_PLSR(grid, pcs, eofs_da, trsgi_df, sort_lon, sort_lat, var_name, search
                     corr_arr = np.where(t_corr_arr==0, 0, 1)
                     tr_mask = ~(wTR_arr[mask]==0).all(axis=1)
                     #test_mask = ~(wTR_arr[~mask]==0).all(axis=1)
-                    test_mask = ~(wTR_arr[mask]==0).all(axis=1)
+                    test_mask = ~(wTR_arr==0).all(axis=1)
 
                     
                     #####selecting best_ncomp######
